@@ -1,80 +1,100 @@
-# Gold Recovery Prediction
+# ⛏️ Gold Recovery Prediction
 
-## Overview
+![Gold Recovery Banner](Figures/gold_recovery.png)
 
-This project focuses on developing a machine learning model for Zyfra, a company specializing in solutions for the heavy industry sector. The goal is to estimate the amount of gold recovered from a gold mine to enhance gold yield by avoiding unprofitable parameter settings. The project involves analyzing data related to the gold extraction and purification process.
+<div align="center">
 
-The project workflow includes:
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![Pandas](https://img.shields.io/badge/Pandas-2.2-150458?style=flat&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.6-F7931E?style=flat&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![RandomForest](https://img.shields.io/badge/Model-Random_Forest-228B22?style=flat)](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html)
+[![Seaborn](https://img.shields.io/badge/Seaborn-0.13-4C72B0?style=flat&logo=seaborn&logoColor=white)](https://seaborn.pydata.org/)
 
-- Preparing and cleaning the data
-- Performing exploratory data analysis
-- Training and evaluating machine learning models
+**Optimizing industrial yield for Zyfra by predicting gold recovery efficiency.**
 
-## Objectives
+</div>
 
-- Inspect and validate the correctness of gold recovery calculations in the dataset
-- Analyze changes in metal concentration (Au, Ag, Pb) across purification stages
-- Analyze metal concentration trends across purification stages
-- Compare particle size distributions between training and test datasets
-- Develop a machine learning model to predict gold recovery efficiency
-- Evaluate multiple models using cross-validation to select the best performer
-- Calculate the final sMAPE metric to assess model accuracy
+---
 
-## Data Description
+## 📋 Overview
 
-The project uses three datasets:
+This project delivers a machine learning solution for **Zyfra**, a company specializing in efficiency solutions for heavy industry. The primary objective is to predict the amount of gold recovered from gold ore to enhance production yields. By accurately forecasting the recovery rate, the company can optimize the extraction process and avoid running operations with unprofitable parameter settings.
 
-- `gold_recovery_train.csv`: training data with features and targets
-- `gold_recovery_test.csv`: test data with only features (no targets)
-- `gold_recovery_full.csv`: full dataset containing raw values
-Data is indexed by date and time of acquisition, and parameters close in time are often similar. Some parameters are unavailable in the test set as they were measured or calculated later. The raw data requires preprocessing to ensure correctness.
+The workflow involves **processing time-indexed sensor data**, simulating the entire purification process from rougher feed to final concentrate.
 
-## Purification Flowchart
+---
 
-The diagram below illustrates the overall flow of gold purification.
+## 🎯 Objectives
+
+* **Data Integrity:** Validate the correctness of recovery calculations in the raw data and preprocess time-indexed datasets.
+* **Process Analysis:** Track the changing concentrations of metals (Gold, Silver, Lead) across sequential purification stages.
+* **Distribution Check:** Compare particle size distributions in training vs. test sets to ensure model generalizability.
+* **Model Development:** Train regressors to predict two distinct target variables: `rougher.output.recovery` and `final.output.recovery`.
+* **Evaluation:** Implement a custom **sMAPE (Symmetric Mean Absolute Percentage Error)** metric to evaluate model accuracy.
+
+---
+
+## 💾 Data Description
+
+The data is indexed by the date and time of acquisition (`date`). Parameters observed close in time are often similar.
+
+| Dataset | Description |
+| :--- | :--- |
+| **`gold_recovery_train.csv`** | Training data containing features and both target variables. |
+| **`gold_recovery_test.csv`** | Test data without target variables (used for final evaluation). Some features calculated later in the process are absent here. |
+| **`gold_recovery_full.csv`** | The complete raw dataset containing all features and targets. |
+
+---
+
+## ⚙️ The Purification Process
+
+Understanding the industrial process was critical for feature selection. The ore passes through distinct stages:
+
 ![Purification Process](Figures/purification_flowchart.png)
 
-## Key Visualizations
-
-### 1. Gold (Au) Concentration Across Purification Stages
-
-This plot shows how gold concentration steadily increases from the input feed to the final concentrate.
-
-![Gold Concentration](Figures/Au_concentration_across_purification_stages.png)
+1.  **Flotation (Rougher):** Gold ore mixture is fed into float banks to produce a rougher Au concentrate.
+2.  **Primary Cleaner:** The product undergoes primary purification.
+3.  **Secondary Cleaner:** Further purification to remove impurities.
+4.  **Final Concentrate:** The final output containing the highest gold concentration.
 
 ---
 
-### 2. Silver (Ag) Concentration Across Purification Stages
+## 🔬 Modeling & Performance
 
-This plot demonstrates how silver is successfully removed through the purification process.
+To solve this regression task, I evaluated **Linear Regression**, **Decision Tree**, and **Random Forest** models. A key challenge was defining the custom loss function, **sMAPE**, which is standard in this industrial domain for measuring accuracy in percentage terms.
 
-![Silver Concentration](Figures/Ag_concentration_across_purification_stages.png)
+The final sMAPE is calculated as a weighted average of the rougher stage (25%) and the final stage (75%).
+
+| Model | Final sMAPE Score | Verdict |
+| :--- | :--- | :--- |
+| **Random Forest** | **7.08** | **🏆 Best Model** |
+| Linear Regression | *High sMAPE* | Outperformed |
+| Decision Tree | *High sMAPE* | Outperformed |
+
+**Insight:** The **Random Forest Regression** model significantly outperformed the other algorithms, achieving the lowest error rate (7.08 sMAPE), making it the most reliable choice for predicting recovery efficiency.
 
 ---
 
-### 3. Feed Particle Size Distribution
+## 🖼️ Key Visualizations
 
-This plot compares the particle size distribution between the training and test datasets.
+The EDA phase revealed crucial insights into the chemical process, confirming the data's validity for modeling.
 
-![Particle Size Distribution](Figures/Feed_particle_size_distribution.png)
+<div align="center">
 
+| **Gold (Au) Concentration** | **Silver (Ag) Concentration** |
+|:---:|:---:|
+| ![Gold Conc](Figures/Au_concentration_across_purification_stages.png) | ![Silver Conc](Figures/Ag_concentration_across_purification_stages.png) |
+| *Gold concentration consistently increases at every stage, peaking at the final output.* | *Silver levels decrease as purification progresses, indicating successful removal of impurities.* |
 
-## Key Insights
+</div>
 
-- Gold concentration increases consistently across purification stages, peaking at the final stage
-- Silver concentration decreases with each stage, indicating effective impurity reduction
-- Lead concentration shows no consistent pattern beyond the primary stage
-- Particle size distributions in the test set are representative of the training set, ensuring valid   model evaluation
-- Rows with zero total concentrations were removed as they are unrealistic in ore processing
-- Random Forest Regression (sMAPE: 7.08) outperformed Linear Regression and Decision Trees, making it  the best model for predicting gold recovery efficiency
+### Particle Size Distribution
+To ensure the model trained on historical data would work on new data, I compared the feed particle size distributions.
+![Particle Size](Figures/Feed_particle_size_distribution.png)
+*The overlapping distributions confirm that the training and test sets are representative of each other.*
 
+---
 
-## Tools and Technologies
+## 📝 Conclusion
 
-- Python       3.12.10
-- Pandas       2.2.3
-- NumPy        2.2.5
-- Matplotlib   3.10.1 
-- Seaborn      0.13.12
-- Scikit-learn 1.6.1
-
+By rigorously cleaning the data, validating the chemical process trends, and optimizing a Random Forest Regressor, I achieved a **Final sMAPE of 7.08**. This model provides Zyfra with a reliable tool to predict gold recovery, enabling data-driven decisions to optimize production settings and maximize profitability.
